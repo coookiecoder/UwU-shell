@@ -1,5 +1,4 @@
 #include <Shell.hpp>
-#include <readline/readline.h>
 
 int main(int argc, char **argv, char **environment_variable) {
     Shell shell(environment_variable);
@@ -12,4 +11,10 @@ int main(int argc, char **argv, char **environment_variable) {
         free(line);
         line = readline(PROMPT);
     }
+
+    std::cout << "clearing readline" << std::endl;
+
+    rl_clear_history();
+
+    std::cout << "done !" << std::endl;
 }

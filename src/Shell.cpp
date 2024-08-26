@@ -23,6 +23,8 @@ Shell::Shell(char **environment_variable) {
 }
 
 std::list<pid_t> Shell::interpret(const std::string& line) {
+    add_history(line.c_str());
+
     std::list<std::string> token = this->tokenize(line);
 
     std::list<pid_t> pid_list;

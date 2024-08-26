@@ -6,7 +6,12 @@
 
 #include <iostream>
 
-#define PROMPT "UwU shell\n>"
+#include <readline/readline.h>
+#include <readline/history.h>
+
+#define PROMPT "\
+╭─UwU shell\n\
+╰─>"
 
 enum quote_state {
     NO_QUOTE = 0,
