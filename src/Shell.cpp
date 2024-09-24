@@ -27,6 +27,24 @@ std::list<pid_t> Shell::interpret(const std::string& line) {
 
     std::list<std::string> token = this->tokenize(line);
 
+	std::list<Command> command_list;
+	command_list.emplace_back();
+
+	for (const auto &item: token) {
+		if (item == "|") {
+			command_list.emplace_back();
+			continue;
+		} else if (command_list.back().is_binary_set()) {
+			command_list.back().set_binary(item);
+		} else {
+			command_list.back().add_argv(item);
+		}
+	}
+
+	for (const auto &item: command_list) {
+		std::cout << item << std::endl;
+	}
+
     std::list<pid_t> pid_list;
     return pid_list;
 }
@@ -39,10 +57,14 @@ std::list<std::string> Shell::tokenize(const std::string &line) {
 
     for (const auto &item: line) {
         this->quote_state = update_quote_state(item, this->quote_state);
-        if (item == ' ' && quote_state == NO_QUOTE && token_start != token_end) {
+        if ((item == ' ' || item == '|') && quote_state == NO_QUOTE && token_start != token_end) {
             token.emplace_back(line.substr(token_start, token_end - token_start));
+			if (item == '|')
+				token.emplace_back("|");
             token_start = token_end + 1;
-        }
+        } else if (item == ' ' && quote_state == NO_QUOTE) {
+			token_start++;
+		}
         token_end++;
     }
 

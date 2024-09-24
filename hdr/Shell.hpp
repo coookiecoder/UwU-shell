@@ -9,6 +9,8 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+#include <Command.hpp>
+
 #define PROMPT "\
 ╭─UwU shell\n\
 ╰─>"
