@@ -41,7 +41,8 @@ std::list<pid_t> Shell::interpret(const std::string& line) {
 		}
 	}
 
-	for (const auto &item: command_list) {
+	for (auto &item: command_list) {
+		item.set_redirection();
 		std::cout << item << std::endl;
 	}
 

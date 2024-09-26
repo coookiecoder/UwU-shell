@@ -8,18 +8,22 @@
 
 class Command {
 	private:
-		std::string						binary;
-		std::list<std::string>			argv;
+		std::string										binary;
+		std::list<std::string>							argv;
+		std::string										output_file;
+		std::string										input_file;
+		bool											output_append = false;
 	public:
 		Command();
 
-		void							set_binary(std::string new_binary);
-		void							add_argv(std::string argv_to_add);
+		void											set_binary(std::string new_binary);
+		void											add_argv(const std::string& argv_to_add);
+		void											set_redirection();
 
-		bool							is_binary_set(void);
+		bool											is_binary_set(void);
 
-		const std::string&				get_binary() const;
-		const std::list<std::string>&	get_argv() const;
+		[[nodiscard]] const std::string&				get_binary() const;
+		[[nodiscard]] const std::list<std::string>&		get_argv() const;
 
 		std::ostream&					operator<<(std::ostream &os);
 };
