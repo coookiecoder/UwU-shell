@@ -13,7 +13,7 @@
 
 #define PROMPT "\
 ╭─UwU shell\n\
-╰─>"
+╰─> "
 
 enum quote_state {
     NO_QUOTE = 0,
