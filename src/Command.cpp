@@ -67,36 +67,39 @@ void Command::set_redirection() {
 	}
 }
 
-int Command::execute(const std::list<std::string>& env) {
-	int pid = fork();
+int Command::execute(std::list<std::string>& env) {
+	Error error(0, "");
 
-	if (pid == 0) {
-		char ** argv_exec = new char*[this->argv.size() + 1];
-		int idx = 0;
+	char ** argv_exec = list_to_char_argv(this->binary, this->argv);
 
-		argv_exec[idx++] = const_cast<char *>(this->binary.c_str());
+	if (this->binary == "exit")
+		builtins::UwU_exit(static_cast<int>(this->argv.size() + 1), argv_exec);
+	else if (this->binary == "cd")
+		error = builtins::UwU_cd(static_cast<int>(this->argv.size() + 1), argv_exec);
+	else if (this->binary == "export")
+		error = builtins::UwU_export(static_cast<int>(this->argv.size() + 1), argv_exec, env);
+	else if (this->binary == "unset")
+		error = builtins::UwU_unset(static_cast<int>(this->argv.size() + 1), argv_exec, env);
+	else {
+		int pid = fork();
 
-		for (const auto &item: argv) {
-			argv_exec[idx++] = const_cast<char *>(item.c_str()); // yes I hate it too
+		if (pid == 0) {
+			char **envp = list_to_char(env);
+
+			execvpe(this->binary.c_str(), argv_exec, envp);
+
+			std::cout << "UwU-shell: command not found : \"" << this->binary << "\"" << std::endl;
+
+			exit(1);
 		}
-		argv_exec[idx] = nullptr;
 
-		char ** envp = new char*[env.size() + 1];
-		idx = 0;
-
-		for (const auto &item: env) {
-			envp[idx++] = const_cast<char *>(item.c_str()); // yes I hate it too
-		}
-		envp[idx] = nullptr;
-
-		execvpe(this->binary.c_str(), argv_exec, envp);
-
-		std::cout << "UwU-shell: command not found : \"" << this->binary << "\"" << std::endl;
-
-		exit(1);
+		return (pid);
 	}
 
-	return (pid);
+	if (error.get_error_code())
+		std::cout << "UwU-shell: " << error.get_error() << std::endl;
+
+	return (0);
 }
 
 bool Command::is_binary_set() {
@@ -125,4 +128,28 @@ std::ostream& operator<<(std::ostream &os, const Command& cmd) {
 		os << arg << " ";
 	}
 	return os;
+}
+
+char ** list_to_char_argv(const std::string& bin, const std::list<std::string>& list) {
+	char ** argv = new char*[list.size() + 2];
+	int idx = 0;
+
+	argv[idx++] = const_cast<char *>(bin.c_str());
+
+	for (const auto &item: list) {
+		argv[idx++] = const_cast<char *>(item.c_str()); // yes I hate it too
+	}
+	argv[idx] = nullptr;
+	return argv;
+}
+
+char ** list_to_char(const std::list<std::string>& list) {
+	char ** char_list = new char*[list.size() + 1];
+	int idx = 0;
+
+	for (const auto &item: list) {
+		char_list[idx++] = const_cast<char *>(item.c_str()); // yes I hate it too
+	}
+	char_list[idx] = nullptr;
+	return char_list;
 }

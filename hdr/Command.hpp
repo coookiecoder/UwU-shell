@@ -8,6 +8,8 @@
 
 #include <unistd.h>
 
+#include <builtins.hpp>
+
 class Command {
 	private:
 		std::string										binary;
@@ -21,7 +23,7 @@ class Command {
 		void											set_binary(std::string new_binary);
 		void											add_argv(const std::string& argv_to_add);
 		void											set_redirection();
-		int												execute(const std::list<std::string>& env);
+		int												execute(std::list<std::string>& env);
 
 		bool											is_binary_set(void);
 
@@ -33,5 +35,7 @@ class Command {
 
 std::ostream& operator<<(std::ostream &os, const Command& cmd);
 
+char ** list_to_char_argv(const std::string& bin, const std::list<std::string>&list);
+char ** list_to_char(const std::list<std::string>&list);
 
 #endif

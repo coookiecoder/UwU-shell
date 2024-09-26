@@ -15,6 +15,8 @@ int main(int argc, char **argv, char **environment_variable) {
 			for (const auto &item: pid_list) {
 				waitpid(item, nullptr, 0);
 			}
+
+			usleep(100000);
 		}
         free(line);
         line = readline(PROMPT);
