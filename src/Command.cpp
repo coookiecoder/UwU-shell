@@ -1,5 +1,4 @@
 #include <Command.hpp>
-#include <utility>
 
 Command::Command() {
 	binary = "";
@@ -66,6 +65,38 @@ void Command::set_redirection() {
     	std::advance(it, item - removed_element++);
     	this->argv.erase(it);
 	}
+}
+
+int Command::execute(const std::list<std::string>& env) {
+	int pid = fork();
+
+	if (pid == 0) {
+		char ** argv_exec = new char*[this->argv.size() + 1];
+		int idx = 0;
+
+		argv_exec[idx++] = const_cast<char *>(this->binary.c_str());
+
+		for (const auto &item: argv) {
+			argv_exec[idx++] = const_cast<char *>(item.c_str()); // yes I hate it too
+		}
+		argv_exec[idx] = nullptr;
+
+		char ** envp = new char*[env.size() + 1];
+		idx = 0;
+
+		for (const auto &item: env) {
+			envp[idx++] = const_cast<char *>(item.c_str()); // yes I hate it too
+		}
+		envp[idx] = nullptr;
+
+		execvpe(this->binary.c_str(), argv_exec, envp);
+
+		std::cout << "UwU-shell: command not found : \"" << this->binary << "\"" << std::endl;
+
+		exit(1);
+	}
+
+	return (pid);
 }
 
 bool Command::is_binary_set() {

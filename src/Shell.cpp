@@ -23,6 +23,8 @@ Shell::Shell(char **environment_variable) {
 }
 
 std::list<pid_t> Shell::interpret(const std::string& line) {
+	std::list<pid_t> pid_list;
+
     add_history(line.c_str());
 
     std::list<std::string> token = this->tokenize(line);
@@ -43,10 +45,9 @@ std::list<pid_t> Shell::interpret(const std::string& line) {
 
 	for (auto &item: command_list) {
 		item.set_redirection();
-		std::cout << item << std::endl;
+		pid_list.push_back(item.execute(this->environment_variable));
 	}
 
-    std::list<pid_t> pid_list;
     return pid_list;
 }
 
