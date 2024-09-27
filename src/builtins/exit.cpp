@@ -3,7 +3,6 @@
 
 Error builtins::UwU_exit(int argc, char **argv) {
 	if (argc != 2) {
-		std::cerr << "invalid usage of exit" << std::endl;
 		exit(0);
 	}
 	std::string buffer_string(argv[1]);
