@@ -1,7 +1,7 @@
 #include <builtins.hpp>
 
 static
-bool env_valid (std::string env) {
+bool env_valid (const std::string& env) {
 	for (const auto &item: env) {
 		if (isalnum(item) || item == '=')
 			continue;

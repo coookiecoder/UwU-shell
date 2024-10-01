@@ -89,15 +89,19 @@ int Command::execute(std::list<std::string>& env) {
 			execvpe(this->binary.c_str(), argv_exec, envp);
 
 			std::cout << "UwU-shell: command not found : \"" << this->binary << "\"" << std::endl;
-
+			delete[] envp;
 			exit(1);
 		}
+
+		delete[] argv_exec;
 
 		return (pid);
 	}
 
 	if (error.get_error_code())
 		std::cout << "UwU-shell: " << error.get_error() << std::endl;
+
+	delete[] argv_exec;
 
 	return (0);
 }
@@ -130,6 +134,7 @@ std::ostream& operator<<(std::ostream &os, const Command& cmd) {
 	return os;
 }
 
+[[nodiscard]]
 char ** list_to_char_argv(const std::string& bin, const std::list<std::string>& list) {
 	char ** argv = new char*[list.size() + 2];
 	int idx = 0;
@@ -143,6 +148,7 @@ char ** list_to_char_argv(const std::string& bin, const std::list<std::string>& 
 	return argv;
 }
 
+[[nodiscard]]
 char ** list_to_char(const std::list<std::string>& list) {
 	char ** char_list = new char*[list.size() + 1];
 	int idx = 0;
