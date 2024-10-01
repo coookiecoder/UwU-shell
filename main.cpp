@@ -2,7 +2,7 @@
 
 #include <Shell.hpp>
 
-int main(int argc, char **argv, char **environment_variable) {
+int main(int, char **, char **environment_variable) {
     Shell shell(environment_variable);
 
     char *line = readline(PROMPT);

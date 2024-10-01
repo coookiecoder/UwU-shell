@@ -18,6 +18,7 @@ class Command {
 		std::string										output_file;
 		std::string										input_file;
 		bool											output_append = false;
+
 	public:
 		Command();
 
@@ -27,7 +28,7 @@ class Command {
 		void											purge_quote();
 		int												execute(std::list<std::string>& env);
 
-		bool											is_binary_set(void);
+		bool											is_binary_set();
 
 		[[nodiscard]] const std::string&				get_binary() const;
 		[[nodiscard]] const std::list<std::string>&		get_argv() const;

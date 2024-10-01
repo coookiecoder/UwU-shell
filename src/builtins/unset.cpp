@@ -5,5 +5,5 @@ Error builtins::UwU_unset(int argc, char **argv, std::list<std::string>& env) {
 		env.remove(argv[idx]);
 	}
 
-	return (Error(0, ""));
+	return {0, ""};
 }

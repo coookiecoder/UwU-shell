@@ -33,7 +33,7 @@ public:
     std::list<pid_t>        interpret(const std::string& line);
 
 private:
-    std::list<std::string>  tokenize(const std::string& line);
+    static std::list<std::string>  tokenize(const std::string& line);
 };
 
 

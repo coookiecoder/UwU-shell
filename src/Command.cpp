@@ -55,9 +55,6 @@ void Command::set_redirection() {
 			item_to_remove.push_back(index++);
 			next_item_redirection_input = false;
 			continue;
-		} else if (item[0] == '"' || item[0] == '\'') {
-			index++;
-			continue;
 		} else if (item == ">") {
 			next_item_redirection_output = true;
 			output_append = false;

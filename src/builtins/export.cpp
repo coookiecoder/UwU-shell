@@ -2,13 +2,11 @@
 
 static
 bool env_valid (const std::string& env) {
-	for (const auto &item: env) {
-		if (isalnum(item) || item == '=')
-			continue;
-		else
-			return false;
+	if (std::all_of(env.begin(), env.end(), [](char item) { return isalnum(item) || item == '='; })) {
+		return true;
+	} else {
+		return false;
 	}
-	return true;
 }
 
 Error builtins::UwU_export(int argc, char **argv, std::list<std::string>& env) {

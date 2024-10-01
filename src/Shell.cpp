@@ -25,7 +25,7 @@ std::list<pid_t> Shell::interpret(const std::string& line) {
 
     add_history(line.c_str());
 
-    std::list<std::string> token = this->tokenize(line);
+    std::list<std::string> token = Shell::tokenize(line);
 
 	std::list<Command> command_list;
 	command_list.emplace_back();

@@ -12,5 +12,4 @@ Error builtins::UwU_exit(int argc, char **argv) {
 	buffer >> exit_code;
 
 	exit(exit_code);
-	return {1, "call to exit() failed"};
 }
