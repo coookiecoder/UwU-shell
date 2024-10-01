@@ -14,7 +14,6 @@ namespace builtins {
 	Error	UwU_exit(int argc, char** argv);
 	Error	UwU_export(int argc, char** argv, std::list<std::string>& env);
 	Error	UwU_unset(int argc, char** argv, std::list<std::string>& env);
-	Error	UwU_env(int argc, char** argv, std::list<std::string> env);
 }
 
 #endif
