@@ -12,15 +12,18 @@ bool env_valid (std::string env) {
 }
 
 Error builtins::UwU_export(int argc, char **argv, std::list<std::string>& env) {
-	if (argc == 1)
-		return UwU_env(argc, argv, env);
+	if (argc == 1) {
+		for (const auto &item: env) {
+			std::cout << item << std::endl;
+		}
+	}
 
 	for (int idx = 1; idx < argc; ++idx) {
 		if (env_valid(argv[idx]))
 			env.emplace_back(argv[idx]);
 		else
-			return Error(idx - 1, "invalid environment variable (see index trough return code)");
+			return {idx - 1, "invalid environment variable (see index trough return code)"};
 	}
 
-	return (Error(0, ""));
+	return {0, ""};
 }
