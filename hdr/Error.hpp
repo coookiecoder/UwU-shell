@@ -12,8 +12,8 @@ class Error {
 
 		Error&operator=(const Error &);
 
-		int			get_error_code();
-		std::string get_error();
+		int			get_error_code() const;
+		std::string get_error() const;
 };
 
 

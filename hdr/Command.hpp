@@ -8,6 +8,7 @@
 
 #include <unistd.h>
 
+#include <Shell.hpp>
 #include <builtins.hpp>
 
 class Command {
@@ -23,6 +24,7 @@ class Command {
 		void											set_binary(std::string new_binary);
 		void											add_argv(const std::string& argv_to_add);
 		void											set_redirection();
+		void											purge_quote();
 		int												execute(std::list<std::string>& env);
 
 		bool											is_binary_set(void);

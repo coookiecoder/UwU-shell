@@ -21,14 +21,12 @@ enum quote_state {
     DOUBLE_QUOTE = 2
 };
 
-enum quote_state update_quote_state(char item);
+enum quote_state update_quote_state(char item, enum quote_state quote_state);
 
 class Shell {
 private:
     int                     environment_variable_size;
     std::list<std::string>  environment_variable;
-
-    enum quote_state        quote_state;
 
 public:
     explicit                Shell(char **environment_variable);

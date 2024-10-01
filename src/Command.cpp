@@ -14,6 +14,29 @@ void Command::add_argv(const std::string& argv_to_add) {
 	this->argv.push_back(argv_to_add);
 }
 
+void Command::purge_quote() {
+	for (auto &token: this->argv) {
+		int position = 0;
+		enum quote_state quote_state = NO_QUOTE;
+
+		for (const auto &item: token) {
+			quote_state = update_quote_state(item, quote_state);
+			if (item == '\"' && (quote_state == DOUBLE_QUOTE || quote_state == NO_QUOTE)) {
+				token.erase(position, 1);
+			}
+			if (item == '\'' && (quote_state == SIMPLE_QUOTE || quote_state == NO_QUOTE)) {
+				token.erase(position, 1);
+			}
+			position++;
+		}
+
+		if (quote_state == DOUBLE_QUOTE)
+			throw std::runtime_error("invalid syntax missing \"");
+		if (quote_state == SIMPLE_QUOTE)
+			throw std::runtime_error("invalid syntax missing \'");
+	}
+}
+
 void Command::set_redirection() {
 	bool next_item_redirection_output = false;
 	bool next_item_redirection_input = false;
@@ -127,7 +150,8 @@ const std::list<std::string> &Command::get_argv() const {
 }
 
 std::ostream& operator<<(std::ostream &os, const Command& cmd) {
-	os << cmd.get_binary() << " ";
+	os << "binary : " << cmd.get_binary() << " ";
+	os << "argv : ";
 	for (const auto &arg: cmd.get_argv()) {
 		os << arg << " ";
 	}

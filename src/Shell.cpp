@@ -18,8 +18,6 @@ Shell::Shell(char **environment_variable) {
     while (environment_variable[this->environment_variable_size]) {
         this->environment_variable.emplace_back(environment_variable[this->environment_variable_size++]);
     }
-
-    quote_state = NO_QUOTE;
 }
 
 std::list<pid_t> Shell::interpret(const std::string& line) {
@@ -43,9 +41,14 @@ std::list<pid_t> Shell::interpret(const std::string& line) {
 		}
 	}
 
-	for (auto &item: command_list) {
-		item.set_redirection();
-		pid_list.push_back(item.execute(this->environment_variable));
+	try {
+		for (auto &item: command_list) {
+			item.set_redirection();
+			item.purge_quote();
+			pid_list.push_back(item.execute(this->environment_variable));
+		}
+	} catch (std::runtime_error& error) {
+		std::cerr << error.what() << std::endl;
 	}
 
     return pid_list;
@@ -53,12 +56,13 @@ std::list<pid_t> Shell::interpret(const std::string& line) {
 
 std::list<std::string> Shell::tokenize(const std::string &line) {
     std::list<std::string> token;
+	enum quote_state quote_state = NO_QUOTE;
 
     int token_start = 0;
     int token_end = 0;
 
     for (const auto &item: line) {
-        this->quote_state = update_quote_state(item, this->quote_state);
+        quote_state = update_quote_state(item, quote_state);
         if ((item == ' ' || item == '|' || item == ';') && quote_state == NO_QUOTE && token_start != token_end) {
             token.emplace_back(line.substr(token_start, token_end - token_start));
 			if (item == '|')

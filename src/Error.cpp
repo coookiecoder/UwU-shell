@@ -1,20 +1,17 @@
 #include <Error.hpp>
 
-Error::Error(int error_code, std::string error) : error_code(error_code), error(error) {
+#include <utility>
+
+Error::Error(int error_code, std::string error) : error_code(error_code), error(std::move(error)) {
 
 }
 
-Error &Error::operator=(const Error & src) {
-	this->error_code = src.error_code;
-	this->error = src.error;
+Error &Error::operator=(const Error & src) = default;
 
-	return *this;
-}
-
-int Error::get_error_code() {
+int Error::get_error_code() const {
 	return this->error_code;
 }
 
-std::string Error::get_error() {
+std::string Error::get_error() const {
 	return this->error;
 }
