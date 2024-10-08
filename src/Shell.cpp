@@ -21,34 +21,76 @@ Shell::Shell(char **environment_variable) {
 }
 
 std::list<pid_t> Shell::interpret(const std::string& line) {
-	std::list<pid_t> pid_list;
-
-    add_history(line.c_str());
+	add_history(line.c_str());
 
     std::list<std::string> token = Shell::tokenize(line);
 
-	std::list<Command> command_list;
-	command_list.emplace_back();
+	std::list<std::list<Command>> pipe_list;
+	pipe_list.emplace_back();
+	pipe_list.back().emplace_back();
 
 	for (const auto &item: token) {
-		if (item == "|" || item == ";") {
-			command_list.emplace_back();
-			continue;
-		} else if (command_list.back().is_binary_set()) {
-			command_list.back().set_binary(item);
+		if (item == ";") {
+			pipe_list.emplace_back();
+			pipe_list.back().emplace_back();
+		} else if (item == "|") {
+			pipe_list.back().emplace_back();
+		} else if (pipe_list.back().back().is_binary_set()) {
+			pipe_list.back().back().set_binary(item);
 		} else {
-			command_list.back().add_argv(item);
+			pipe_list.back().back().add_argv(item);
 		}
 	}
 
+	std::vector<std::vector<std::array<int, 2>>> pipe_fd;
+
+	for (auto &command_list: pipe_list) {
+		if (command_list.size() == 1)
+			continue;
+		else {
+			pipe_fd.emplace_back();
+			for (int i = 0; i < command_list.size() - 1; ++i) {
+				pipe_fd.back().emplace_back();
+				if (pipe(pipe_fd.back().back().data()) == -1)
+					throw std::runtime_error("pipe creation failed");
+			}
+		}
+	}
+
+	std::list<pid_t> pid_list;
+
+	int pipe_index = 0;
+	int command_index = 0;
+
 	try {
-		for (auto &item: command_list) {
-			item.set_redirection();
-			item.purge_quote();
-			pid_list.push_back(item.execute(this->environment_variable));
+		for (auto &command_list: pipe_list) {
+			command_index = 0;
+			for (auto &command: command_list) {
+				command.set_redirection();
+				if (command_list.size() > 1) {
+					if (command_index == 0) {
+						command.set_pipe(0, pipe_fd[pipe_index][command_index], pipe_fd[pipe_index][command_index]);
+					} else if (command_index < command_list.size() - 1) {
+						command.set_pipe(1, pipe_fd[pipe_index][command_index - 1], pipe_fd[pipe_index][command_index]);
+					} else if (command_index == command_list.size() - 1) {
+						command.set_pipe(2, pipe_fd[pipe_index][command_index - 1], pipe_fd[pipe_index][command_index - 1]);
+					}
+				}
+				command.purge_quote();
+				pid_list.push_back(command.execute(this->environment_variable, pipe_fd));
+				command_index++;
+			}
+			pipe_index++;
 		}
 	} catch (std::runtime_error& error) {
 		std::cerr << error.what() << std::endl;
+	}
+
+	for (const auto &item: pipe_fd) {
+		for (auto &pipe: item) {
+			close(pipe[0]);
+			close(pipe[1]);
+		}
 	}
 
     return pid_list;

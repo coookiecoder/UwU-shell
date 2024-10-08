@@ -49,11 +49,17 @@ void Command::set_redirection() {
 			output_file = item;
 			item_to_remove.push_back(index++);
 			next_item_redirection_output = false;
+			if (output_fd != 1)
+				close(output_fd);
+			output_fd = open(output_file.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0655);
 			continue;
 		} else if (next_item_redirection_input) {
 			input_file = item;
 			item_to_remove.push_back(index++);
 			next_item_redirection_input = false;
+			if (input_fd != 0)
+				close(input_fd);
+			input_fd = open(input_file.c_str(), O_RDONLY);
 			continue;
 		} else if (item == ">") {
 			next_item_redirection_output = true;
@@ -65,12 +71,21 @@ void Command::set_redirection() {
 			next_item_redirection_input = true;
 		} else if (item[0] == '>' && item[1] != '>') {
 			output_file = item.c_str() + 1;
+			if (output_fd != 1)
+				close(output_fd);
+			output_fd = open(output_file.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0655);
 			output_append = false;
 		} else if (item[0] == '>' && item[1] == '>') {
 		 	output_file = item.c_str() + 2;
+			 if (output_fd != 1)
+				close(output_fd);
+			output_fd = open(output_file.c_str(), O_CREAT | O_WRONLY, 0655);
 			output_append = true;
 		} else if (item[0] == '<') {
 			input_file = item.c_str() + 1;
+			if (input_fd != 0)
+				close(input_fd);
+			input_fd = open(input_file.c_str(), O_RDONLY);
 		} else {
 			index++;
 			continue;
@@ -87,7 +102,35 @@ void Command::set_redirection() {
 	}
 }
 
-int Command::execute(std::list<std::string>& env) {
+void Command::set_pipe(int mode, const std::array<int, 2> &fds, const std::array<int, 2>& fds_2) {
+	std::cout << binary << " mode : " << mode << std::endl;
+
+	if (mode == 0) {
+		if (output_fd != 1)
+			close(output_fd);
+		output_fd = fds[1];
+		output_fd_pipe = fds[0];
+	}
+	if (mode == 2) {
+		if (input_fd != 0)
+			close(input_fd);
+		input_fd = fds[0];
+		input_fd_pipe = fds[1];
+	}
+	if (mode == 1) {
+		if (output_fd != 1)
+			close(output_fd);
+		output_fd = fds_2[1];
+		output_fd_pipe = fds_2[0];
+
+		if (input_fd != 0)
+			close(input_fd);
+		input_fd = fds[0];
+		input_fd_pipe = fds[1];
+	}
+}
+
+int Command::execute(std::list<std::string>& env, const std::vector<std::vector<std::array<int, 2>>>& pipe_fd) {
 	Error error(0, "");
 
 	char ** argv_exec = list_to_char_argv(this->binary, this->argv);
@@ -104,6 +147,23 @@ int Command::execute(std::list<std::string>& env) {
 		int pid = fork();
 
 		if (pid == 0) {
+			if (input_fd != 0) {
+				std::cout << binary << ": input redirection : " << input_fd << std::endl;
+				dup2(input_fd, 0);
+			}
+
+			if (output_fd != 1) {
+				std::cout << binary << ": output redirection : " << output_fd << std::endl;
+				dup2(output_fd, 1);
+			}
+
+			for (const auto &item: pipe_fd) {
+				for (auto &pipe: item) {
+					close(pipe[0]);
+					close(pipe[1]);
+				}
+			}
+
 			char **envp = list_to_char(env);
 
 			execvpe(this->binary.c_str(), argv_exec, envp);
