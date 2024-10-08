@@ -14,7 +14,7 @@
 #include <Command.hpp>
 
 #define PROMPT "\
-╭─UwU shell\n\
+╭─ =UwU= shell\n\
 ╰─> "
 
 enum quote_state {
