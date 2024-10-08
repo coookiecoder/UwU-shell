@@ -103,8 +103,6 @@ void Command::set_redirection() {
 }
 
 void Command::set_pipe(int mode, const std::array<int, 2> &fds, const std::array<int, 2>& fds_2) {
-	std::cout << binary << " mode : " << mode << std::endl;
-
 	if (mode == 0) {
 		if (output_fd != 1)
 			close(output_fd);
@@ -148,12 +146,10 @@ int Command::execute(std::list<std::string>& env, const std::vector<std::vector<
 
 		if (pid == 0) {
 			if (input_fd != 0) {
-				std::cout << binary << ": input redirection : " << input_fd << std::endl;
 				dup2(input_fd, 0);
 			}
 
 			if (output_fd != 1) {
-				std::cout << binary << ": output redirection : " << output_fd << std::endl;
 				dup2(output_fd, 1);
 			}
 
