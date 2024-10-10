@@ -30,6 +30,8 @@ std::list<pid_t> Shell::interpret(const std::string& line) {
 	pipe_list.back().emplace_back();
 
 	for (const auto &item: token) {
+		if (item.empty())
+			continue;
 		if (item == ";") {
 			pipe_list.emplace_back();
 			pipe_list.back().emplace_back();

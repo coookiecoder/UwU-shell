@@ -16,6 +16,11 @@ void Command::add_argv(const std::string& argv_to_add) {
 
 void Command::purge_quote() {
 	for (auto &token: this->argv) {
+		if (token == "\"\"" || token == "\'\'") {
+			token = "";
+			continue ;
+		}
+
 		int position = 0;
 		enum quote_state quote_state = NO_QUOTE;
 
