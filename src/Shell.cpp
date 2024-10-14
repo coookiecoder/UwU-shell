@@ -29,6 +29,29 @@ std::list<pid_t> Shell::interpret(const std::string& line) {
 	pipe_list.emplace_back();
 	pipe_list.back().emplace_back();
 
+	size_t env_pos_start = 0;
+	size_t env_pos_end = 0;
+
+	for (auto &item: token) {
+		if (item[0] == '\'')
+			continue;
+		env_pos_start = item.find('$');
+		while (env_pos_start != std::string::npos) {
+			env_pos_end = ++env_pos_start;
+			while (item[env_pos_end] != ' ' && item[env_pos_end] != '$' && item[env_pos_end])
+				env_pos_end++;
+			std::string key = item.substr(env_pos_start, env_pos_end - env_pos_start);
+			std::string value = this->get_env(key);
+			if (value.empty()) {
+				item.erase(env_pos_start - 1, env_pos_end - env_pos_start + 1);
+				env_pos_start--;
+			}
+			else
+				item.replace(env_pos_start - 1, env_pos_end - env_pos_start + 1, value);
+			env_pos_start = item.find('$', env_pos_start);
+		}
+	}
+
 	for (const auto &item: token) {
 		if (item.empty())
 			continue;
@@ -123,4 +146,19 @@ std::list<std::string> Shell::tokenize(const std::string &line) {
     token.emplace_back(line.substr(token_start, token_end - token_start));
 
     return token;
+}
+
+std::string Shell::get_env(const std::string &key) {
+	for (const auto &item: this->environment_variable) {
+		size_t equal = item.find('=');
+		if (equal != std::string::npos) {
+			std::string key_env = item.substr(0, equal);
+			if (key == key_env)
+				return (item.substr(equal + 1));
+		} else {
+			if (item == key)
+				return {};
+		}
+	}
+	return {};
 }

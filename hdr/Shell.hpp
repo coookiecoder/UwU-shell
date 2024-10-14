@@ -27,15 +27,16 @@ enum quote_state update_quote_state(char item, enum quote_state quote_state);
 
 class Shell {
 private:
-    int                     environment_variable_size;
-    std::list<std::string>  environment_variable;
+    int								environment_variable_size;
+    std::list<std::string>			environment_variable;
 
 public:
-    explicit                Shell(char **environment_variable);
-    std::list<pid_t>        interpret(const std::string& line);
+    explicit                		Shell(char **environment_variable);
+    std::list<pid_t>        		interpret(const std::string& line);
 
 private:
-    static std::list<std::string>  tokenize(const std::string& line);
+    static std::list<std::string> 	tokenize(const std::string& line);
+	std::string						get_env(const std::string& key);
 };
 
 
