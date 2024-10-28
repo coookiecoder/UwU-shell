@@ -139,7 +139,7 @@ int Command::execute(std::list<std::string>& env, const std::vector<std::vector<
 	char ** argv_exec = list_to_char_argv(this->binary, this->argv);
 
 	if (this->binary == "exit")
-		builtins::UwU_exit(static_cast<int>(this->argv.size() + 1), argv_exec);
+		error = builtins::UwU_exit(static_cast<int>(this->argv.size() + 1), argv_exec);
 	else if (this->binary == "cd")
 		error = builtins::UwU_cd(static_cast<int>(this->argv.size() + 1), argv_exec);
 	else if (this->binary == "export")
