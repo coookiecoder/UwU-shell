@@ -35,7 +35,8 @@ public:
     std::list<pid_t>        		interpret(const std::string& line);
 
 private:
-    static std::list<std::string> 	tokenize(const std::string& line);
+    std::list<std::string>			tokenize(const std::string& line);
+    std::list<std::string>			expand(std::list<std::string>& token);
 	std::string						get_env(const std::string& key);
 };
 
