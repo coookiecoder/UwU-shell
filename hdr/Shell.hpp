@@ -13,6 +13,8 @@
 
 #include <Command.hpp>
 
+class Command;
+
 #define PROMPT "\
 ╭─ =UwU= shell\n\
 ╰─> "
@@ -27,17 +29,19 @@ enum quote_state update_quote_state(char item, enum quote_state quote_state);
 
 class Shell {
 private:
-    int								environment_variable_size;
-    std::list<std::string>			environment_variable;
+    int												environment_variable_size;
+    std::list<std::string>							environment_variable;
 
 public:
-    explicit                		Shell(char **environment_variable);
-    std::list<pid_t>        		interpret(const std::string& line);
+    explicit										Shell(char **environment_variable);
+    std::list<pid_t>								interpret(const std::string& line);
 
 private:
-    std::list<std::string>			tokenize(const std::string& line);
-    std::list<std::string>			expand(std::list<std::string>& token);
-	std::string						get_env(const std::string& key);
+    std::list<std::string>							tokenize(const std::string& line);
+    std::list<std::string>							expand(std::list<std::string>& token);
+	std::list<std::list<Command>>					setup_command(std::list<std::string>& token, std::list<std::list<Command>>& pipe_list);
+	std::vector<std::vector<std::array<int, 2>>>	open_pipe(std::vector<std::vector<std::array<int, 2>>>& pipe_fd, std::list<std::list<Command>>& pipe_list);
+	std::string										get_env(const std::string& key);
 };
 
 

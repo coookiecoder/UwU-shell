@@ -30,43 +30,18 @@ std::list<pid_t> Shell::interpret(const std::string& line) {
 	pipe_list.back().emplace_back();
 
 	Shell::expand(token);
-
-	for (const auto &item: token) {
-		if (item.empty())
-			continue;
-		if (item == ";") {
-			pipe_list.emplace_back();
-			pipe_list.back().emplace_back();
-		} else if (item == "|") {
-			pipe_list.back().emplace_back();
-		} else if (pipe_list.back().back().is_binary_set()) {
-			pipe_list.back().back().set_binary(item);
-		} else {
-			pipe_list.back().back().add_argv(item);
-		}
-	}
+	Shell::setup_command(token, pipe_list);
 
 	std::vector<std::vector<std::array<int, 2>>> pipe_fd;
 
-	for (auto &command_list: pipe_list) {
-		if (command_list.size() == 1)
-			continue;
-		else {
-			pipe_fd.emplace_back();
-			for (int i = 0; i < command_list.size() - 1; ++i) {
-				pipe_fd.back().emplace_back();
-				if (pipe(pipe_fd.back().back().data()) == -1)
-					throw std::runtime_error("pipe creation failed");
-			}
-		}
-	}
+	Shell::open_pipe(pipe_fd, pipe_list);
 
 	std::list<pid_t> pid_list;
 
-	int pipe_index = 0;
-	int command_index = 0;
-
 	try {
+		int pipe_index = 0;
+		int command_index = 0;
+
 		for (auto &command_list: pipe_list) {
 			command_index = 0;
 			for (auto &command: command_list) {
@@ -151,6 +126,41 @@ std::list<std::string> Shell::expand(std::list<std::string>& token) {
 		}
 	}
 	return (token);
+}
+
+std::list<std::list<Command>> Shell::setup_command(std::list<std::string>& token, std::list<std::list<Command>>& pipe_list) {
+	for (const auto &item: token) {
+		if (item.empty())
+			continue;
+		if (item == ";") {
+			pipe_list.emplace_back();
+			pipe_list.back().emplace_back();
+		} else if (item == "|") {
+			pipe_list.back().emplace_back();
+		} else if (pipe_list.back().back().is_binary_set()) {
+			pipe_list.back().back().set_binary(item);
+		} else {
+			pipe_list.back().back().add_argv(item);
+		}
+	}
+	return (pipe_list);
+}
+
+
+std::vector<std::vector<std::array<int, 2>>> Shell::open_pipe(std::vector<std::vector<std::array<int, 2>>>& pipe_fd, std::list<std::list<Command>>& pipe_list) {
+	for (auto &command_list: pipe_list) {
+		if (command_list.size() == 1)
+			continue;
+		else {
+			pipe_fd.emplace_back();
+			for (int i = 0; i < command_list.size() - 1; ++i) {
+				pipe_fd.back().emplace_back();
+				if (pipe(pipe_fd.back().back().data()) == -1)
+					throw std::runtime_error("pipe creation failed");
+			}
+		}
+	}
+	return (pipe_fd);
 }
 
 std::string Shell::get_env(const std::string &key) {
