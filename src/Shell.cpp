@@ -56,6 +56,7 @@ std::list<pid_t> Shell::interpret(const std::string& line) {
 					}
 				}
 				command.purge_quote();
+				command.purge_quote_binary();
 				pid_list.push_back(command.execute(this->environment_variable, pipe_fd));
 				command_index++;
 			}

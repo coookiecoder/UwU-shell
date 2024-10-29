@@ -32,6 +32,7 @@ class Command {
 		void											set_redirection();
 		void											set_pipe(int mode, const std::array<int, 2>& fds, const std::array<int, 2>& fds_2);
 		void											purge_quote();
+		void											purge_quote_binary();
 		int												execute(std::list<std::string>& env, const std::vector<std::vector<std::array<int, 2>>>& pipe_fd);
 
 		bool											is_binary_set();

@@ -1,5 +1,16 @@
 #include <Command.hpp>
 
+static
+bool is_redirection(const std::string& binary) {
+	if (binary[0] == '\"' || binary[0] == '\'')
+		return false;
+	if (binary == ">" || binary == ">>" || binary == "<" || binary == "<<")
+		return true;
+	if (binary[0] == '>' || binary[0] == '<')
+		return true;
+	return false;
+}
+
 Command::Command() {
 	binary = "";
 }
@@ -42,12 +53,36 @@ void Command::purge_quote() {
 	}
 }
 
+void Command::purge_quote_binary() {
+	int position = 0;
+	enum quote_state quote_state = NO_QUOTE;
+
+	for (const auto &item: this->binary) {
+		quote_state = update_quote_state(item, quote_state);
+		if (item == '\"' && (quote_state == DOUBLE_QUOTE || quote_state == NO_QUOTE)) {
+			this->binary.erase(position, 1);
+		}
+		if (item == '\'' && (quote_state == SIMPLE_QUOTE || quote_state == NO_QUOTE)) {
+			this->binary.erase(position, 1);
+		}
+		position++;
+	}
+
+	if (quote_state == DOUBLE_QUOTE)
+		throw std::runtime_error("invalid syntax missing \"");
+	if (quote_state == SIMPLE_QUOTE)
+		throw std::runtime_error("invalid syntax missing \'");
+}
+
 void Command::set_redirection() {
 	bool next_item_redirection_output = false;
 	bool next_item_redirection_input = false;
 
 	std::list<int> item_to_remove;
 	int index = 0;
+
+	if (is_redirection(this->binary))
+		throw (std::runtime_error("excepted a string, found a redirection"));
 
 	for (const auto &item: this->argv) {
 		if (next_item_redirection_output) {
@@ -86,11 +121,13 @@ void Command::set_redirection() {
 				close(output_fd);
 			output_fd = open(output_file.c_str(), O_CREAT | O_WRONLY, 0655);
 			output_append = true;
-		} else if (item[0] == '<') {
+		} else if (item[0] == '<' && item[1] != '<') {
 			input_file = item.c_str() + 1;
 			if (input_fd != 0)
 				close(input_fd);
 			input_fd = open(input_file.c_str(), O_RDONLY);
+		} else if (item == "<<") {
+			throw (std::runtime_error("excepted a string, found a redirection"));
 		} else {
 			index++;
 			continue;
