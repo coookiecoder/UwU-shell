@@ -126,7 +126,7 @@ void Command::set_redirection() {
 			if (input_fd != 0)
 				close(input_fd);
 			input_fd = open(input_file.c_str(), O_RDONLY);
-		} else if (item == "<<") {
+		} else if (is_redirection(item)) {
 			throw (std::runtime_error("excepted a string, found a redirection"));
 		} else {
 			index++;
