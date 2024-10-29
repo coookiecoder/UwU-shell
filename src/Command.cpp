@@ -115,7 +115,7 @@ void Command::set_redirection() {
 				close(output_fd);
 			output_fd = open(output_file.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0655);
 			output_append = false;
-		} else if (item[0] == '>' && item[1] == '>') {
+		} else if (item[0] == '>' && item[1] == '>' && item[2] != '>') {
 		 	output_file = item.c_str() + 2;
 			 if (output_fd != 1)
 				close(output_fd);
